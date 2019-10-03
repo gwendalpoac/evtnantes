@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+  	<link href="main.css" rel="stylesheet">
+  	<title>API NANTES </title>
+  	<script src="script.js"></script>
+
+
+  </head>
+  <body>
+	<form id="app" v-if="afficher">
+
+	<div class="bar">
+
+		<!-- These two buttons switch the layout variable,
+			 which causes the correct UL to be shown. -->
+
+		<a class="list-icon" v-bind:class="{ 'active': layout == 'list'}" v-on:click="layout = 'list'"></a>
+		<a class="grid-icon" v-bind:class="{ 'active': layout == 'grid'}" v-on:click="layout = 'grid'"></a>
+	</div>
+
+	<!-- We have two layouts. We choose which one to show depending on the "layout" binding -->
+
+	<ul v-if="layout == 'grid'" class="grid">
+		<!-- A view with big photos and no text -->
+		<li v-for="a in response">
+            <a v-bind:href="a.fields.lieu_siteweb" target="_blank"><img v-bind:src="a.fields.media_1" /></a> 
+            <p>{{a.fields.ville}}</p>
+            <p>{{a.fields.lieu}}</p>
+            <p>{{a.fields.adresse}}</p>
+            <p>{{a.fields.date}}</p>
+		</li>
+	</ul>
+
+	<ul v-if="layout == 'list'" class="list">
+		<!-- A compact view smaller photos and titles -->
+		<li v-for="a in response">
+			 <a v-bind:href="a.fields.lieu_siteweb" target="_blank"><img v-bind:src="a.fields.media_1" /></a> 
+            <p>{{a.fields.ville}}</p>
+            <p>{{a.fields.lieu}}</p>
+            <p>{{a.fields.adresse}}</p>
+            <p>{{a.fields.date}}</p>
+		</li>
+	</ul>
+
+</form>
+
+  	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  	<script>
+		new Vue({
+		  el: '#app',
+		  data () {
+
+		    return {
+		      response: null,
+		      afficher: false,
+		      layout: "list"
+		    }
+		  },
+		  filters: {
+		    currencydecimal (value) {
+		      return value.toFixed(2)
+		    }
+		  },
+		  mounted () {
+		  	var self = this;
+		    axios
+		      .get("https://data.nantesmetropole.fr/api/records/1.0/search/?dataset=244400404_agenda-evenements-nantes-nantes-metropole&facet=emetteur&facet=rubrique&facet=lieu&facet=ville" )
+		      .then(response => {
+		      	console.log(response.data)
+		        self.response = response.data.records
+		        self.afficher=true;
+		        //console.log(info)
+		      })
+		      .catch(error => {
+		        console.log(error)
+		        this.errored = true
+		      })
+		      .finally(() => this.loading = false)
+		  }
+		})
+	</script>
+
+  </body>
+</html>
